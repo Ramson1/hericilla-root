@@ -1,0 +1,57 @@
+# Supabase CLI project configuration.
+# For a hosted project run: supabase link --project-ref <ref>
+# then: supabase db push   (applies supabase/migrations in order)
+
+project_id = "hericilla"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3001", "http://localhost:3002", "hericilla://login"]
+jwt_expiry = 3600
+enable_signup = false
+secure_email_change_enabled = true
+
+[auth.email]
+enable_confirmations = false
+
+[storage]
+enabled = true
+file_size_limit = "20MiB"
+
+[realtime]
+enabled = true
+
+[edge_runtime]
+enabled = true
+
+[functions.enquiry-intake]
+verify_jwt = false
+
+[functions.career-apply]
+verify_jwt = false
+
+[functions.notify]
+verify_jwt = false   # guarded internally by service-role key / cron secret
+
+[functions.attendance-geofence]
+verify_jwt = true
+
+[functions.pdf-export]
+verify_jwt = true

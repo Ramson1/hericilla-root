@@ -1,0 +1,8 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Keep React aligned with Expo SDK 53 (react 19.0.0) across the hoisted workspace.
+overrides:
+  react: 19.0.0
+  react-dom: 19.0.0

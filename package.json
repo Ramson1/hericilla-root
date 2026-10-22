@@ -1,0 +1,26 @@
+{
+  "name": "hericilla",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:website": "turbo run dev --filter=@hericilla/website",
+    "dev:admin": "turbo run dev --filter=@hericilla/admin",
+    "dev:staff": "turbo run dev --filter=@hericilla/staff-portal",
+    "dev:driver": "turbo run dev --filter=@hericilla/driver-app",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "gen:types": "supabase gen types typescript --linked > packages/types/src/database.ts"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "19.0.0",
+      "react-dom": "19.0.0"
+    }
+  },
+  "packageManager": "pnpm@9.15.0"
+}

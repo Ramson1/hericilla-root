@@ -1,0 +1,36 @@
+# dependencies
+node_modules/
+
+# builds
+.next/
+out/
+dist/
+dist-verify/
+.expo/
+build/
+.turbo/
+
+# env — never commit real keys
+.env
+.env.local
+.env*.local
+
+# temp scratch from planning phase (safe to delete manually)
+.tmp_pdf/
+
+# logs & editor
+*.log
+.DS_Store
+.idea/
+.vscode/
+
+# supabase local
+supabase/.branches
+supabase/.temp
+
+# the four apps are independent projects with their own git repositories
+# (hericilla-website, hericilla, hericilla-staff, hericilla-rider on GitHub)
+/apps/website/
+/apps/admin/
+/apps/staff-portal/
+/apps/driver-app/

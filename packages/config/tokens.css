@@ -1,0 +1,73 @@
+/* Hericilla design tokens — Tailwind CSS v4 (2026: calm depth, large type, high contrast) */
+@theme {
+  /* Brand palette derived from company logo: deep navy + teal accent */
+  --color-brand-50: #eef7f9;
+  --color-brand-100: #d5ebf0;
+  --color-brand-200: #aed7e0;
+  --color-brand-300: #74b8c9;
+  --color-brand-400: #3f95ac;
+  --color-brand-500: #1d7791;
+  --color-brand-600: #145f78;
+  --color-brand-700: #124c61;
+  --color-brand-800: #123e50;
+  --color-brand-900: #0f3343;
+  --color-brand-950: #082030;
+
+  --color-accent-400: #f5a524;
+  --color-accent-500: #e8890c;
+  --color-accent-600: #c66e08;
+
+  --color-success-100: #dcfce7;
+  --color-success-600: #15803d;
+  --color-success-800: #14532d;
+  --color-warning-100: #fef3c7;
+  --color-warning-600: #b45309;
+  --color-warning-800: #92400e;
+  --color-danger-100: #fee2e2;
+  --color-danger-600: #b91c1c;
+  --color-danger-800: #991b1b;
+  --color-info-100: #dbeafe;
+  --color-info-600: #1d4ed8;
+  --color-info-800: #1e40af;
+
+  --color-surface: #f7f9fb;
+  --color-card: #ffffff;
+  --color-ink: #16232e;
+  --color-ink-soft: #45596b;
+  --color-line: #dbe4ea;
+
+  /* Elderly-first sizing: base 18–20px */
+  --text-base: 1.125rem;
+  --text-base--line-height: 1.7;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 1.875rem;
+  --text-3xl: 2.25rem;
+
+  --radius-card: 1.25rem;
+  --radius-btn: 0.875rem;
+
+  --shadow-card: 0 1px 3px rgb(15 51 67 / 0.08), 0 8px 24px rgb(15 51 67 / 0.06);
+  --shadow-pop: 0 4px 12px rgb(15 51 67 / 0.14), 0 24px 48px rgb(15 51 67 / 0.12);
+
+  --font-sans: "Atkinson Hyperlegible", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html {
+  font-size: 18px;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

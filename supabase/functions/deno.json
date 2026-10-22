@@ -1,0 +1,9 @@
+{
+  "$schema": "https://deno.land/json-schema.deno.json",
+  "imports": {},
+  "tasks": {
+    "check": "deno check */index.ts"
+  },
+  "fmt": { "lineWidth": 100 },
+  "unstable": ["kv"]
+}
