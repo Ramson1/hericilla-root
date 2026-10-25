@@ -1,5 +1,5 @@
 -- 0021: Public enquiry status lookup (limited fields, no personal data beyond name)
-create or replace function public.get_enquiry_status(p_ref text)
+create or replace function public.hericilla_get_enquiry_status(p_ref text)
 returns table (ref_no text, status text, created_at timestamptz, updated_summary text)
 language sql stable security definer set search_path = public as $$
   select e.ref_no, e.status::text, e.created_at,
@@ -11,9 +11,9 @@ language sql stable security definer set search_path = public as $$
            when 'closed' then 'This enquiry is closed. Contact us any time again.'
            else 'In progress.'
          end as updated_summary
-  from enquiries e
-  left join profiles p on p.id = e.assigned_to
+  from hericilla_enquiries e
+  left join hericilla_profiles p on p.id = e.assigned_to
   where upper(e.ref_no) = upper(trim(p_ref));
 $$;
 
-grant execute on function public.get_enquiry_status(text) to anon, authenticated;
+grant execute on function public.hericilla_get_enquiry_status(text) to anon, authenticated;

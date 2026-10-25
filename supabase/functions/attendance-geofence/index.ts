@@ -42,7 +42,7 @@ Deno.serve(async (req: Request) => {
   if (!site && work_order_id) {
     // a work order's fence comes from today's shift assignment for it, if any
     const { data: sa } = await supabase
-      .from("shift_assignments").select("site_id")
+      .from("hericilla_shift_assignments").select("site_id")
       .eq("work_order_id", work_order_id)
       .eq("work_date", new Date().toISOString().slice(0, 10))
       .not("site_id", "is", null)
@@ -50,17 +50,17 @@ Deno.serve(async (req: Request) => {
     site = sa?.site_id ?? null;
   }
   if (!site && shift_id) {
-    const { data: sh } = await supabase.from("shifts").select("default_site_id").eq("id", shift_id).single();
+    const { data: sh } = await supabase.from("hericilla_shifts").select("default_site_id").eq("id", shift_id).single();
     site = sh?.default_site_id ?? null;
   }
   if (site) {
-    const { data: s } = await supabase.from("sites").select("lat, lng, radius_m").eq("id", site).single();
+    const { data: s } = await supabase.from("hericilla_sites").select("lat, lng, radius_m").eq("id", site).single();
     if (s) target = s;
   }
 
   // Config: geofence enforcement can be softened via app_settings
   const { data: setting } = await supabase
-    .from("app_settings").select("value").eq("key", "attendance_enforce_geofence").single();
+    .from("hericilla_app_settings").select("value").eq("key", "attendance_enforce_geofence").single();
   const enforce = setting?.value !== false;
 
   let verdict: "verified" | "outside" | "unchecked" = "unchecked";
@@ -80,7 +80,7 @@ Deno.serve(async (req: Request) => {
   }
 
   // Append the event through the user-scoped RPC (dedupes offline replays)
-  const { data: eventId, error } = await supabase.rpc("clock_event", {
+  const { data: eventId, error } = await supabase.rpc("hericilla_clock_event", {
     p_type: event_type,
     p_work_order: work_order_id ?? null,
     p_site: site ?? null,

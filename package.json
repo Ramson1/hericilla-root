@@ -10,7 +10,8 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
-    "gen:types": "supabase gen types typescript --linked > packages/types/src/database.ts"
+    "gen:types": "supabase gen types typescript --linked > packages/types/src/database.ts",
+    "check:schema": "node scripts/check-schema-refs.mjs"
   },
   "devDependencies": {
     "turbo": "^2.3.3",

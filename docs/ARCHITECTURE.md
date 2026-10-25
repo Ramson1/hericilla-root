@@ -12,7 +12,7 @@ driver-app (Expo) ─┘       │
 
 ## App gating by role
 
-| Role (`profiles.role`)        | Website | Admin portal | Staff portal | Driver app |
+| Role (`hericilla_profiles.role`) | Website | Admin portal | Staff portal | Driver app |
 |-------------------------------|---------|--------------|--------------|------------|
 | super_admin, admin            | yes     | yes          | —            | —          |
 | supervisor                    | yes     | yes          | yes          | —          |
@@ -20,7 +20,29 @@ driver-app (Expo) ─┘       │
 | warehouse_agent, staff        | yes     | —            | yes          | —          |
 | driver                        | yes     | —            | —            | yes        |
 
-RBAC helpers in SQL: `auth.current_role()`, `auth.has_role(VARIADIC text[])`. All tables are deny-by-default (RLS enabled, no policy = no access). Full policy matrix lives in `supabase/migrations/0017_audit_rls.sql`.
+RBAC helpers in SQL: `public.hericilla_is_ops()`, `public.hericilla_is_admin()`, `public.hericilla_is_driver()`, `public.hericilla_has_role(...)`. All tables are deny-by-default (RLS enabled, no policy = no access). Full policy matrix lives in `supabase/migrations/0018_audit_rls.sql`, with later gaps closed in 0022 and 0024.
+
+### Object naming — `hericilla_` prefix
+
+This Supabase account hosts other projects, so every object we create carries the company name. Tables,
+views, enum types and functions all live in the shared `public` schema and take the underscore prefix:
+`hericilla_clients`, `hericilla_work_orders`, `hericilla_pipeline`, `hericilla_job_status`,
+`hericilla_is_ops`. Storage buckets take the hyphen form used by their ids: `hericilla-documents`,
+`hericilla-pod-evidence`. The four frontends (website, admin portal, staff portal, driver app) and the
+Edge Functions all talk to that one schema, so the prefix is what identifies Hericilla objects wherever
+they are seen — including in the dashboard's Tables, Types, Functions and Storage sections.
+
+Run `pnpm check:schema` after touching migrations or queries. It fails on an unprefixed object, on a
+reference to one that does not exist, and on the stranding positions a rename misses by eye: policies
+that qualify their protected table (`` `<table>.id` ``), `` `<name>%rowtype` `` attributes, declare-block
+row variables (`` `<var> <table>;` ``), column and parameter definitions that name an enum type, function
+calls with no schema qualifier, `.rpc("…")`, embedded relations without an alias, `headCount("…")` and
+bucket ids that drifted from the canonical spelling. `scripts/rename-tables.mjs` performs the same
+renames in every one of those positions; it is idempotent, so a dry run reporting zero changes is the
+proof that a tree is fully moved.
+
+Embedded relations keep their old JSON keys through aliases:
+`.select("*, clients:hericilla_clients(name)")`.
 
 ## Admin portal navigation (elderly-first, 7 items)
 
@@ -40,21 +62,21 @@ Every page: title + one-line plain-English purpose + collapsible 3-step "What do
 
 ## Data model spine
 
-`enquiries`/`service_requests` → `quotations` → **`work_orders` (`wo_number`)** → typed jobs (`transport_jobs`, `packing_jobs`, `purchase_requests`) → `job_status_history`, `proof_of_delivery`, `attendance_events`, `documents`, `trip_expenses` → `invoices` → `payments`. `payroll_runs`/`payslips` consume approved `attendance_daily` + `attendance_rules`. `vehicle_allocations` + append-only `vehicle_movements` track fleet.
+`hericilla_enquiries`/`hericilla_service_requests` → `hericilla_quotations` → **`hericilla_work_orders` (`wo_number`)** → typed jobs (`hericilla_transport_jobs`, `hericilla_packing_jobs`, `hericilla_purchase_requests`) → `hericilla_job_status_history`, `hericilla_proof_of_delivery`, `hericilla_attendance_events`, `hericilla_documents`, `hericilla_trip_expenses` → `hericilla_invoices` → payments. `hericilla_payroll_runs`/`hericilla_payslips` consume approved `hericilla_attendance_daily` + `hericilla_attendance_rules`. `hericilla_vehicle_allocations` + append-only `hericilla_vehicle_movements` track fleet.
 
 ## Notification flow
 
-1. Any producer (trigger, Edge Function, UI action) inserts a row into `notification_outbox` (recipient or role target, channel list, payload).
+1. Any producer (trigger, Edge Function, UI action) inserts a row into `hericilla_notification_outbox` (recipient or role target, channel list, payload).
 2. `notify` Edge Function runs on interval (pg_cron → `net.http_postfix` or supabase scheduler), claims due rows, fans out to:
-   - Expo push service (`exp.host/--/api/v2/push/send`) using `expo_push_tokens`;
-   - Web Push (`web-push` Deno port + VAPID) using `web_push_subscriptions`;
+   - Expo push service (`exp.host/--/api/v2/push/send`) using `hericilla_expo_push_tokens`;
+   - Web Push (`web-push` Deno port + VAPID) using `hericilla_web_push_subscriptions`;
    - Resend email for critical events and as universal fallback;
-   - In-app bell rows (same table, read state via `notifications_seen`).
+   - In-app bell rows (same table, read state via `hericilla_notifications_seen`).
 3. Failures retry with exponential backoff (`attempt_count`, `next_retry_at`).
 
 ## Storage buckets
 
-`public-assets` (website/blog/testimonial images) · `enquiry-uploads` (visitor documents) · `documents` (contracts, permits — private) · `pod-evidence` (delivery photos/signatures) · `receipts` (expense photos). Private buckets use signed URLs gated by RLS.
+`hericilla-public-assets` (website/blog/testimonial images) · `hericilla-enquiry-uploads` (visitor documents) · `hericilla-documents` (contracts, permits — private) · `hericilla-pod-evidence` (delivery photos/signatures) · `hericilla-receipts` (expense photos). Private buckets use signed URLs gated by RLS. Bucket ids are prefixed with `hericilla-` because the id is what the dashboard and `storage.objects` rows show; `hericilla_documents` with an underscore is the documents *table*, and the schema guard keeps the two apart.
 
 ## Offline strategy (driver app)
 

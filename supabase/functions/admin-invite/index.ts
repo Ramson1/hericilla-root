@@ -50,7 +50,7 @@ Deno.serve(async (req: Request) => {
   const { data: me, error: meErr } = await caller.auth.getUser();
   if (meErr || !me?.user) return Response.json({ error: "invalid session" }, { status: 401 });
   const { data: myProfile } = await caller
-    .from("profiles")
+    .from("hericilla_profiles")
     .select("role")
     .eq("id", me.user.id)
     .single();
@@ -87,7 +87,7 @@ Deno.serve(async (req: Request) => {
 
   // Belt & braces: make sure the profile carries the exact role/department/phone.
   await service
-    .from("profiles")
+    .from("hericilla_profiles")
     .update({
       full_name: fullName,
       role,
@@ -98,7 +98,7 @@ Deno.serve(async (req: Request) => {
     })
     .eq("id", created.user.id);
 
-  await service.from("notification_outbox").insert({
+  await service.from("hericilla_notification_outbox").insert({
     recipient_user_id: created.user.id,
     channels: ["email", "in_app"],
     title: "Welcome to Hericilla",

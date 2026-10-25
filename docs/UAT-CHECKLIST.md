@@ -64,7 +64,7 @@ Conventions used below:
 - [ ] Create a Purchase Request under a work order → route for approval.
 - [ ] Record two supplier quotations → comparison screen highlights the cheaper total.
 - [ ] Select a quotation → create PO → PO shows margin-relevant totals.
-- [ ] Approve a PR **above** the creator's `approval_limits` while signed in as procurement officer → blocked / routed upward; approve as admin → allowed.
+- [ ] Approve a PR **above** the creator's `hericilla_approval_limits` while signed in as procurement officer → blocked / routed upward; approve as admin → allowed.
 - [ ] Goods Received Note against the PO → stock received appears in Inventory if items link to inventory.
 - [ ] Supplier list → performance score updates after GRN.
 
@@ -121,7 +121,7 @@ Conventions used below:
 ## 10. Admin — payroll & salary allocator
 
 - [ ] Salary structure for a driver: base + allowance − deduction → effective today.
-- [ ] Payroll run wizard → pick month → pulls **approved attendance only** → overtime calculated per active `attendance_rules` (grace, multiplier, weekly cap).
+- [ ] Payroll run wizard → pick month → pulls **approved attendance only** → overtime calculated per active `hericilla_attendance_rules` (grace, multiplier, weekly cap).
 - [ ] Draft payslip shows gross/overtime/deductions/net → adjust one with a reason → audit entry.
 - [ ] Submit run for approval → approve as finance officer → payslips locked.
 - [ ] **Approver ≠ recipient**: signed-in as the person being paid → approve button unavailable.
@@ -149,7 +149,7 @@ Conventions used below:
 
 ## 13. Notifications & reminders
 
-- [ ] Run `select public.check_document_expiry(), public.notify_upcoming_expiries();` (or wait for the 07:00 UTC cron) → documents/vehicles/licences expiring within the reminder window generate bell items for admin/logistics/HR and an email.
+- [ ] Run `select public.hericilla_check_document_expiry(), public.hericilla_notify_upcoming_expiries();` (or wait for the 07:00 UTC cron) → documents/vehicles/licences expiring within the reminder window generate bell items for admin/logistics/HR and an email.
 - [ ] Same reminder does **not** fire twice for the same expiry date (dedup table).
 - [ ] Enquiry + chat offline + attendance exceptions + payroll approval each reach the right roles with sensible wording.
 - [ ] Web push delivered while browser open; in-app bell + email still arrive with push disabled (fallback).

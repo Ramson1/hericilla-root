@@ -5,18 +5,18 @@
 --    attendance_events for anyone with select on the view. Re-declared with
 --    security_invoker so employees see their own days and managers see their scope.
 
-drop policy if exists corr_ops_update on attendance_corrections;
-create policy corr_ops_update on attendance_corrections for update to authenticated
-  using (public.is_ops() and (requested_by <> auth.uid() or public.is_admin()))
-  with check (public.is_ops());
+drop policy if exists corr_ops_update on hericilla_attendance_corrections;
+create policy corr_ops_update on hericilla_attendance_corrections for update to authenticated
+  using (public.hericilla_is_ops() and (requested_by <> auth.uid() or public.hericilla_is_admin()))
+  with check (public.hericilla_is_ops());
 
-create or replace view attendance_daily with (security_invoker = on) as
+create or replace view hericilla_attendance_daily with (security_invoker = on) as
 with events as (
   select e.employee_id,
          (e.event_time at time zone 'WAT')::date as work_date,
          e.event_type, e.event_time, e.geofence_result,
          e.work_order_id
-  from attendance_events e
+  from hericilla_attendance_events e
 ),
 first_last as (
   select employee_id, work_date,
@@ -44,8 +44,8 @@ select w.employee_id, w.work_date, w.first_in, w.last_out, w.gross_hours,
          then true else false
        end as is_late
 from worked w
-join profiles p on p.id = w.employee_id
-left join shift_assignments sa on sa.employee_id = w.employee_id and sa.work_date = w.work_date
-left join shifts s on s.id = sa.shift_id
-left join attendance_rules r on r.is_active
+join hericilla_profiles p on p.id = w.employee_id
+left join hericilla_shift_assignments sa on sa.employee_id = w.employee_id and sa.work_date = w.work_date
+left join hericilla_shifts s on s.id = sa.shift_id
+left join hericilla_attendance_rules r on r.is_active
 where 1=1;

@@ -18,6 +18,9 @@ build/
 # temp scratch from planning phase (safe to delete manually)
 .tmp_pdf/
 
+# audit trail written by scripts/rename-tables.mjs
+scripts/rename-report.txt
+
 # logs & editor
 *.log
 .DS_Store

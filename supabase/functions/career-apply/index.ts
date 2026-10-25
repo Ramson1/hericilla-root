@@ -56,7 +56,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const { data: app, error } = await supabase
-    .from("job_applications")
+    .from("hericilla_job_applications")
     .insert({
       career_id: careerId || null,
       full_name: fullName,
@@ -69,7 +69,7 @@ Deno.serve(async (req: Request) => {
     .single();
   if (error || !app) return Response.json({ error: "could not save application" }, { status: 500 });
 
-  await supabase.from("notification_outbox").insert({
+  await supabase.from("hericilla_notification_outbox").insert({
     role_target: "hr_officer",
     channels: ["email", "in_app"],
     title: "New job application",

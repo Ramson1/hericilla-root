@@ -52,7 +52,7 @@ Deno.serve(async (req: Request) => {
 
   if (kind === "invoice") {
     const { data: inv } = await supabase
-      .from("invoices").select("*, client:clients(*), items:invoice_items(*)").eq("id", id).single();
+      .from("hericilla_invoices").select("*, client:hericilla_clients(*), items:hericilla_invoice_items(*)").eq("id", id).single();
     if (!inv) return Response.json({ error: "invoice not found" }, { status: 404 });
     header("INVOICE", inv.ref_no);
     line(`Bill to: ${inv.client?.name ?? "—"}`, { bold: true });
@@ -72,8 +72,8 @@ Deno.serve(async (req: Request) => {
     line("Payment: bank transfer to the account on file. Quote the invoice number.", { size: 9, color: grey });
   } else if (kind === "payslip") {
     const { data: ps } = await supabase
-      .from("payslips")
-      .select("*, employee:profiles!payslips_employee_id_fkey(full_name, employee_no, phone), run:payroll_runs(period_month, status)")
+      .from("hericilla_payslips")
+      .select("*, employee:hericilla_profiles!payslips_employee_id_fkey(full_name, employee_no, phone), run:hericilla_payroll_runs(period_month, status)")
       .eq("id", id).single();
     if (!ps) return Response.json({ error: "payslip not found" }, { status: 404 });
     header("PAYSLIP", `${ps.employee?.employee_no ?? ""} / ${ps.run?.period_month ?? ""}`);
@@ -94,8 +94,8 @@ Deno.serve(async (req: Request) => {
     line(money(ps.net), { dx: 420, size: 14, bold: true, color: brand });
   } else if (kind === "waybill") {
     const { data: j } = await supabase
-      .from("transport_jobs")
-      .select("*, work_order:work_orders(wo_number, title), driver:profiles!transport_jobs_driver_id_fkey(full_name, phone, license_number), client:clients(name)")
+      .from("hericilla_transport_jobs")
+      .select("*, work_order:hericilla_work_orders(wo_number, title), driver:hericilla_profiles!transport_jobs_driver_id_fkey(full_name, phone, license_number), client:hericilla_clients(name)")
       .eq("id", id).single();
     if (!j) return Response.json({ error: "job not found" }, { status: 404 });
     header("WAYBILL", j.ref_no);

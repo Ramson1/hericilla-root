@@ -27,7 +27,7 @@ async function sendExpo(rows: any[]) {
   const tokens = new Map<string, any[]>(); // token -> notification rows
   for (const row of rows.filter((r) => r.channels.includes("expo_push"))) {
     const { data: toks } = await supabase
-      .from("expo_push_tokens")
+      .from("hericilla_expo_push_tokens")
       .select("token")
       .eq("user_id", row.recipient_user_id)
       .eq("enabled", true);
@@ -71,12 +71,12 @@ async function sendExpo(rows: any[]) {
   }
   // Drop tokens for uninstalled devices
   for (const t of failedTokens) {
-    await supabase.from("expo_push_tokens").delete().eq("token", t);
+    await supabase.from("hericilla_expo_push_tokens").delete().eq("token", t);
   }
 }
 
 async function sendWebPush(rows: any[]) {
-  const { data: subs } = await supabase.from("web_push_subscriptions").select("id, endpoint, p256dh, auth, user_id");
+  const { data: subs } = await supabase.from("hericilla_web_push_subscriptions").select("id, endpoint, p256dh, auth, user_id");
   const byUser = new Map<string, any[]>();
   for (const s of subs ?? []) {
     if (!byUser.has(s.user_id)) byUser.set(s.user_id, []);
@@ -91,7 +91,7 @@ async function sendWebPush(rows: any[]) {
         );
       } catch (e: any) {
         if (e?.statusCode === 404 || e?.statusCode === 410) {
-          await supabase.from("web_push_subscriptions").delete().eq("id", sub.id);
+          await supabase.from("hericilla_web_push_subscriptions").delete().eq("id", sub.id);
         }
       }
     }
@@ -103,7 +103,7 @@ async function sendEmail(rows: any[]) {
   if (!key) return;
   const userIds = [...new Set(rows.filter((r) => r.channels.includes("email")).map((r) => r.recipient_user_id))];
   if (userIds.length === 0) return;
-  const { data: profiles } = await supabase.from("profiles").select("id, email, full_name").in("id", userIds);
+  const { data: profiles } = await supabase.from("hericilla_profiles").select("id, email, full_name").in("id", userIds);
   const emailOf = new Map((profiles ?? []).map((p: any) => [p.id, p.email]));
   for (const row of rows.filter((r) => r.channels.includes("email"))) {
     const to = emailOf.get(row.recipient_user_id);
@@ -130,11 +130,11 @@ Deno.serve(async (req: Request) => {
   }
 
   // 1) expand role-targeted notifications into per-user rows
-  await supabase.rpc("expand_role_notifications");
+  await supabase.rpc("hericilla_expand_role_notifications");
 
   // 2) claim due rows
   const { data: rows, error } = await supabase
-    .from("notification_outbox")
+    .from("hericilla_notification_outbox")
     .select("*")
     .in("status", ["queued", "retrying"])
     .lte("next_retry_at", new Date().toISOString())
@@ -144,14 +144,14 @@ Deno.serve(async (req: Request) => {
   if (!rows?.length) return Response.json({ sent: 0 });
 
   const ids = rows.map((r) => r.id);
-  await supabase.from("notification_outbox").update({ status: "sent", sent_at: new Date().toISOString() }).in("id", ids);
+  await supabase.from("hericilla_notification_outbox").update({ status: "sent", sent_at: new Date().toISOString() }).in("id", ids);
 
   // 3) fan out — failures mark retrying/failed with backoff
   try {
     await Promise.all([sendExpo(rows), sendWebPush(rows), sendEmail(rows)]);
   } catch (e) {
     await supabase
-      .from("notification_outbox")
+      .from("hericilla_notification_outbox")
       .update({
         status: "retrying",
         attempt_count: 1,
@@ -163,7 +163,7 @@ Deno.serve(async (req: Request) => {
 
   // 4) hard-fail rows past the attempt cap
   await supabase
-    .from("notification_outbox")
+    .from("hericilla_notification_outbox")
     .update({ status: "failed" })
     .eq("status", "retrying")
     .gte("attempt_count", MAX_ATTEMPTS);

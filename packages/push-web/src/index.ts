@@ -60,7 +60,7 @@ export function useWebPush() {
         throw new Error("You are signed out. Sign in again and press the button once more.");
       }
       await getSupabase()
-        .from("web_push_subscriptions")
+        .from("hericilla_web_push_subscriptions")
         .upsert(
           {
             user_id: sess.user.id,
@@ -101,7 +101,7 @@ export function useUnseenCount(userId: string | null, role: string | null, every
     async function run() {
       const s = getSupabase();
       const { data: rows } = await s
-        .from("notification_outbox")
+        .from("hericilla_notification_outbox")
         .select("id")
         .or(`recipient_user_id.eq.${userId},role_target.eq.${role}`)
         .gte("created_at", new Date(Date.now() - 14 * 86_400_000).toISOString())
@@ -112,7 +112,7 @@ export function useUnseenCount(userId: string | null, role: string | null, every
         return;
       }
       const { data: seen } = await s
-        .from("notifications_seen")
+        .from("hericilla_notifications_seen")
         .select("outbox_id")
         .eq("user_id", userId)
         .in("outbox_id", ids);

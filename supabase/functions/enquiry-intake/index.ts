@@ -44,7 +44,7 @@ Deno.serve(async (req: Request) => {
 
   // ── insert (ref_no default next_ref('ENQ') fires in the DB) ───────────────
   const { data: enquiry, error } = await supabase
-    .from("enquiries")
+    .from("hericilla_enquiries")
     .insert({
       enquiry_type: body.enquiry_type ?? "quotation",
       service_type: body.service_type ?? null,
@@ -65,7 +65,7 @@ Deno.serve(async (req: Request) => {
 
   // ── notify admins (outbox → notify function fans out) ─────────────────────
   await supabase
-    .from("notification_outbox")
+    .from("hericilla_notification_outbox")
     .insert({
       role_target: "admin",
       channels: ["email", "in_app"],

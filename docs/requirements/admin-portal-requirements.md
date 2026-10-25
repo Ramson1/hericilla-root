@@ -73,7 +73,7 @@ The dashboard should provide a real-time operational summary, including:
 
 ### 8. Service Request Management
 
-- Receive service requests from clients or internal teams.
+- Receive service requests from hericilla_clients or internal teams.
 - Categorise requests by service type: logistics, trucking, transportation, procurement, packing and removal, or materials support.
 - Assign requests to responsible departments, officers, or supervisors.
 - Set priority levels, deadlines, and service-level targets.
