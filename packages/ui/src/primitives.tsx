@@ -27,7 +27,7 @@ export function BigButton({
   children,
   ...rest
 }: BigButtonProps) {
-  const sizing = size === "lg" ? "px-8 py-4 text-xl min-h-16" : "px-5 py-3 text-lg min-h-12";
+  const sizing = size === "lg" ? "px-8 py-4 text-lg min-h-16" : "px-5 py-3 text-base min-h-12";
   return (
     <button
       className={`inline-flex items-center justify-center gap-2 rounded-[var(--radius-btn)] font-semibold shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-4 disabled:opacity-50 disabled:cursor-not-allowed ${btnStyles[variant]} ${sizing} ${className}`}
@@ -70,10 +70,10 @@ export function StatCard({
   };
   return (
     <Card className="flex items-start gap-4">
-      {icon && <div className={`rounded-2xl p-3 text-2xl ${tones[tone]}`}>{icon}</div>}
+      {icon && <div className={`rounded-2xl p-3 text-xl ${tones[tone]}`}>{icon}</div>}
       <div>
         <div className="text-ink-soft text-base font-medium">{label}</div>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-xl font-bold">{value}</div>
         {hint && <div className="text-ink-soft text-sm mt-1">{hint}</div>}
       </div>
     </Card>
@@ -92,8 +92,8 @@ export function PageHeader({
   return (
     <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
       <div>
-        <h1 className="text-3xl font-bold text-brand-950">{title}</h1>
-        <p className="text-ink-soft text-lg mt-1 max-w-2xl">{purpose}</p>
+        <h1 className="text-2xl font-bold text-brand-950">{title}</h1>
+        <p className="text-ink-soft text-base mt-1 max-w-2xl">{purpose}</p>
       </div>
       {actions && <div className="flex gap-3 flex-wrap">{actions}</div>}
     </div>
@@ -103,7 +103,7 @@ export function PageHeader({
 export function HintCard({ steps }: { steps: [string, string, string] }) {
   return (
     <details className="bg-info-100 border-2 border-brand-200 rounded-[var(--radius-card)] p-4 mb-6 group" open>
-      <summary className="cursor-pointer font-semibold text-info-800 text-lg select-none">
+      <summary className="cursor-pointer font-semibold text-info-800 text-base select-none">
         What do I do here?
       </summary>
       <ol className="list-decimal list-inside mt-3 space-y-2 text-info-800">
@@ -118,9 +118,9 @@ export function HintCard({ steps }: { steps: [string, string, string] }) {
 export function EmptyState({ title, teach, action }: { title: string; teach: string; action?: ReactNode }) {
   return (
     <div className="text-center py-16 px-6 bg-white rounded-[var(--radius-card)] border-2 border-dashed border-[var(--color-line)]">
-      <div className="text-5xl mb-3" aria-hidden>📭</div>
-      <h3 className="text-xl font-bold text-brand-950">{title}</h3>
-      <p className="text-ink-soft text-lg mt-2 max-w-md mx-auto">{teach}</p>
+      <div className="text-4xl mb-3" aria-hidden>📭</div>
+      <h3 className="text-lg font-bold text-brand-950">{title}</h3>
+      <p className="text-ink-soft text-base mt-2 max-w-md mx-auto">{teach}</p>
       {action && <div className="mt-5">{action}</div>}
     </div>
   );

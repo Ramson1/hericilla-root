@@ -4,8 +4,8 @@ import { useState } from "react";
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
-/* ---------------- Elderly-first form fields ----------------
-   One label per field, inline error text in words, oversized inputs. */
+/* ---------------- Accessible form fields ----------------
+   One label per field, inline error text in words, comfortable inputs. */
 
 function FieldShell({
   label,
@@ -22,7 +22,7 @@ function FieldShell({
 }) {
   return (
     <label className="block mb-5">
-      <span className="block font-semibold text-lg text-brand-950 mb-1">
+      <span className="block font-semibold text-base text-brand-950 mb-1">
         {label}
         {required && <span className="text-danger-600 ml-1" aria-hidden>*</span>}
       </span>
@@ -38,7 +38,7 @@ function FieldShell({
 }
 
 const inputClass =
-  "w-full rounded-xl border-2 border-[var(--color-line)] bg-white px-4 py-3 text-lg min-h-12 " +
+  "w-full rounded-xl border-2 border-[var(--color-line)] bg-white px-4 py-3 text-base min-h-12 " +
   "focus:outline-none focus:ring-4 focus:ring-brand-200 focus:border-brand-500 placeholder:text-gray-400";
 
 export interface BigInputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -142,7 +142,7 @@ export function BigCheckbox({
         className="mt-1 h-6 w-6 accent-[var(--color-brand-700)]"
       />
       <span>
-        <span className="block font-semibold text-lg">{label}</span>
+        <span className="block font-semibold text-base">{label}</span>
         {hint && <span className="block text-ink-soft text-base">{hint}</span>}
       </span>
     </label>

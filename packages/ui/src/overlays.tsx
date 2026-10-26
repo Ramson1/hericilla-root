@@ -39,11 +39,11 @@ export function Modal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-5 border-b border-[var(--color-line)]">
-          <h2 className="text-2xl font-bold text-brand-950">{title}</h2>
+          <h2 className="text-xl font-bold text-brand-950">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-2xl font-bold text-ink-soft hover:text-brand-900 px-2"
+            className="text-xl font-bold text-ink-soft hover:text-brand-900 px-2"
           >
             ✕
           </button>
@@ -80,7 +80,7 @@ export function ConfirmDialog({
   const ok = !confirmWord || typed.trim().toUpperCase() === confirmWord.toUpperCase();
   return (
     <Modal open={open} title={title} onClose={onCancel}>
-      <p className="text-lg mb-4">{message}</p>
+      <p className="text-base mb-4">{message}</p>
       {confirmWord && (
         <p className="text-base mb-2">
           To confirm, type <strong>{confirmWord}</strong> below:
@@ -90,7 +90,7 @@ export function ConfirmDialog({
         <input
           value={typed}
           onChange={(e) => setTyped(e.target.value)}
-          className="w-full rounded-xl border-2 border-[var(--color-line)] px-4 py-3 text-lg mb-4"
+          className="w-full rounded-xl border-2 border-[var(--color-line)] px-4 py-3 text-base mb-4"
           aria-label={`Type ${confirmWord} to confirm`}
         />
       )}
@@ -134,7 +134,7 @@ export function Wizard({
         {steps.map((s, i) => (
           <li key={s.title} className="flex items-center gap-2">
             <span
-              className={`flex h-10 w-10 items-center justify-center rounded-full font-bold text-lg ${
+              className={`flex h-10 w-10 items-center justify-center rounded-full font-bold text-base ${
                 i < index
                   ? "bg-success-600 text-white"
                   : i === index
@@ -149,7 +149,7 @@ export function Wizard({
           </li>
         ))}
       </ol>
-      <h3 className="text-xl font-bold mb-4 text-brand-950">
+      <h3 className="text-lg font-bold mb-4 text-brand-950">
         Step {index + 1} of {steps.length}: {step.title}
       </h3>
       <div>{step.content}</div>
@@ -195,7 +195,7 @@ export function RowCard({
       onKeyDown={onClick ? (e) => e.key === "Enter" && onClick() : undefined}
     >
       <div className="flex-1 min-w-48">
-        <div className="font-bold text-lg text-brand-950">{title}</div>
+        <div className="font-bold text-base text-brand-950">{title}</div>
         {subtitle && <div className="text-ink-soft text-base">{subtitle}</div>}
       </div>
       {badge}
