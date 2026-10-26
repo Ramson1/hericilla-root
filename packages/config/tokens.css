@@ -1,4 +1,4 @@
-/* Hericilla design tokens — Tailwind CSS v4 (2026: calm depth, large type, high contrast) */
+/* Hericilla design tokens — Tailwind CSS v4 (2026: calm depth, standard web type scale, high contrast) */
 @theme {
   /* Brand palette derived from company logo: deep navy + teal accent */
   --color-brand-50: #eef7f9;
@@ -36,13 +36,13 @@
   --color-ink-soft: #45596b;
   --color-line: #dbe4ea;
 
-  /* Elderly-first sizing: base 18–20px */
-  --text-base: 1.125rem;
-  --text-base--line-height: 1.7;
-  --text-lg: 1.25rem;
-  --text-xl: 1.5rem;
-  --text-2xl: 1.875rem;
-  --text-3xl: 2.25rem;
+  /* Standard web sizing (normal font scale across all portals, Oct 2026) */
+  --text-base: 1rem;
+  --text-base--line-height: 1.5;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
 
   --radius-card: 1.25rem;
   --radius-btn: 0.875rem;
@@ -54,14 +54,14 @@
 }
 
 html {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 body {
   background-color: var(--color-surface);
   color: var(--color-ink);
   font-family: var(--font-sans);
-  line-height: 1.7;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 

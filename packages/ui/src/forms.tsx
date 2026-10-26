@@ -1,4 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 /* ---------------- Elderly-first form fields ----------------
    One label per field, inline error text in words, oversized inputs. */
@@ -47,6 +51,37 @@ export function BigInput({ label, hint, error, required, ...rest }: BigInputProp
   return (
     <FieldShell label={label} hint={hint} error={error} required={required}>
       <input className={inputClass} required={required} {...rest} />
+    </FieldShell>
+  );
+}
+
+export interface BigPasswordInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
+  label: string;
+  hint?: string;
+  error?: string;
+}
+
+export function BigPasswordInput({ label, hint, error, required, ...rest }: BigPasswordInputProps) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <FieldShell label={label} hint={hint} error={error} required={required}>
+      <div className="relative">
+        <input
+          type={visible ? "text" : "password"}
+          className={`${inputClass} pr-14`}
+          required={required}
+          {...rest}
+        />
+        <button
+          type="button"
+          onClick={() => setVisible((v) => !v)}
+          aria-label={visible ? "Hide password" : "Show password"}
+          aria-pressed={visible}
+          className="absolute right-2 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-lg text-ink-soft hover:bg-brand-50 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-300"
+        >
+          {visible ? <EyeOff className="h-5 w-5" aria-hidden /> : <Eye className="h-5 w-5" aria-hidden />}
+        </button>
+      </div>
     </FieldShell>
   );
 }
