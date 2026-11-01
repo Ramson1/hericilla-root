@@ -40,19 +40,38 @@ Deno.serve(async (req: Request) => {
   if (form.get("company_website")) return Response.json({ ok: true }); // honeypot
   if (errors.length) return Response.json({ error: "validation failed", fields: errors }, { status: 400 });
 
-  // ── optional CV upload (private bucket, service role bypasses RLS) ─────────
-  let cvUrl: string | null = null;
-  const file = form.get("cv");
-  if (file && file instanceof Blob && file.size > 0) {
-    if (file.size > 8 * 1024 * 1024) {
-      return Response.json({ error: "cv too large (max 8MB)" }, { status: 400 });
+  // ── attachments: up to 6 files (docx/doc/pdf/images), private bucket via service role ─
+  const ALLOWED_MIME = new Set([
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/pdf",
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+  ]);
+  const files = form.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+  const legacyCv = form.get("cv"); // backward compatibility with the old single-CV form
+  if (files.length === 0 && legacyCv instanceof File && legacyCv.size > 0) files.push(legacyCv);
+  if (files.length > 6) {
+    return Response.json({ error: "too many files (max 6)" }, { status: 400 });
+  }
+  const attachments: { path: string; name: string; mime: string; size: number }[] = [];
+  for (const f of files) {
+    if (f.size > 8 * 1024 * 1024) {
+      return Response.json({ error: `file too large (max 8MB): ${f.name}` }, { status: 400 });
     }
-    const name = String(form.get("cv_name") ?? "cv");
-    const path = `applications/${crypto.randomUUID()}-${name.replace(/[^\w.\-]/g, "_")}`;
+    if (f.type && !ALLOWED_MIME.has(f.type)) {
+      return Response.json({ error: `file type not allowed: ${f.name}` }, { status: 400 });
+    }
+    const safeName = f.name.replace(/[^\w.\-]/g, "_");
+    const path = `applications/${careerId || "general"}/${crypto.randomUUID()}-${safeName}`;
     const { error: upErr } = await supabase.storage
-      .from("enquiry-uploads")
-      .upload(path, file, { upsert: false });
-    if (!upErr) cvUrl = path;
+      .from("hericilla-enquiry-uploads")
+      .upload(path, f, { upsert: false, contentType: f.type || undefined });
+    if (upErr) {
+      return Response.json({ error: `upload failed: ${f.name}` }, { status: 500 });
+    }
+    attachments.push({ path, name: f.name, mime: f.type || "application/octet-stream", size: f.size });
   }
 
   const { data: app, error } = await supabase
@@ -63,7 +82,8 @@ Deno.serve(async (req: Request) => {
       email,
       phone,
       cover_letter: coverLetter || null,
-      cv_url: cvUrl,
+      cv_url: attachments[0]?.path ?? null,
+      attachments,
     })
     .select()
     .single();
@@ -73,8 +93,8 @@ Deno.serve(async (req: Request) => {
     role_target: "hr_officer",
     channels: ["email", "in_app"],
     title: "New job application",
-    body: `${fullName} applied${careerId ? " for a posted role" : ""}. Review in Careers.`,
-    data: { url: "/cms/careers", application_id: app.id },
+    body: `${fullName} applied${careerId ? " for a posted role" : ""}${attachments.length ? ` with ${attachments.length} file(s)` : ""}. Review in Careers.`,
+    data: { url: "/cms/careers", application_id: app.id, entity: "hericilla_job_applications" },
   });
 
   return Response.json({ ok: true, id: app.id }, {

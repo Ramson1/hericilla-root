@@ -63,16 +63,20 @@ Deno.serve(async (req: Request) => {
     .single();
   if (error || !enquiry) return Response.json({ error: "could not save enquiry" }, { status: 500 });
 
-  // ── notify admins (outbox → notify function fans out) ─────────────────────
+  // ── notify admins (outbox → notify function fans out).
+  //    Two role targets because the unread/badge query matches role_target
+  //    exactly, and the owner account carries super_admin. ────────────────────
   await supabase
     .from("hericilla_notification_outbox")
-    .insert({
-      role_target: "admin",
-      channels: ["email", "in_app"],
-      title: `New enquiry ${enquiry.ref_no}`,
-      body: `${name}${enquiry.company ? ` (${enquiry.company})` : ""}: ${message.slice(0, 160)}`,
-      data: { url: `/inbox/enquiries/${enquiry.id}`, enquiry_id: enquiry.id },
-    });
+    .insert(
+      ["admin", "super_admin"].map((role) => ({
+        role_target: role,
+        channels: ["email", "in_app"],
+        title: `New enquiry ${enquiry.ref_no}`,
+        body: `${name}${enquiry.company ? ` (${enquiry.company})` : ""}: ${message.slice(0, 160)}`,
+        data: { url: "/inbox", enquiry_id: enquiry.id, entity: "hericilla_enquiries" },
+      })),
+    );
 
   // ── receipt email to the visitor ──────────────────────────────────────────
   const key = Deno.env.get("RESEND_API_KEY");
