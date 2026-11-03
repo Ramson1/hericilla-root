@@ -1,6 +1,6 @@
 // auth-login — verifies the custom credentials table and mints an HS256 JWT whose `sub`
 // is the profile id, so PostgREST still resolves auth.uid() and all RLS keeps working.
-// Public (no bearer required). Env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_JWT_SECRET.
+// Public (no bearer required). Env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, AUTH_JWT_SECRET.
 import bcrypt from "npm:bcryptjs@2.4.3";
 import { json, preflight, service, signToken } from "../_shared/auth.ts";
 
@@ -8,6 +8,17 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return preflight();
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
+  try {
+    return await login(req);
+  } catch (err) {
+    // Surface config/server faults as a readable message instead of a bare 500.
+    const message = err instanceof Error ? err.message : "unexpected error";
+    console.error("auth-login failed:", message);
+    return json({ error: `Sign-in is temporarily unavailable: ${message}` }, 500);
+  }
+});
+
+async function login(req: Request): Promise<Response> {
   let body: Record<string, unknown>;
   try {
     body = await req.json();
@@ -45,4 +56,4 @@ Deno.serve(async (req: Request) => {
   const mustReset = cred.must_reset === true;
   const token = await signToken({ sub: profile.id, email: profile.email, mustReset });
   return json({ token, profile, must_reset: mustReset });
-});
+}

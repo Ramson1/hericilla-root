@@ -7,9 +7,12 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { SignJWT, jwtVerify } from "npm:jose@5.9.6";
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const JWT_SECRET = Deno.env.get("SUPABASE_JWT_SECRET")!;
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+// Supabase stopped injecting SUPABASE_JWT_SECRET into the Edge Runtime, so the
+// legacy HS256 secret is provided as the project secret AUTH_JWT_SECRET (which the
+// CLI also allows — SUPABASE_* is a reserved prefix). Either name works.
+const JWT_SECRET = Deno.env.get("AUTH_JWT_SECRET") || Deno.env.get("SUPABASE_JWT_SECRET") || "";
 
 export const ISSUER = "supabase";
 export const AUDIENCE = "authenticated";
@@ -18,7 +21,13 @@ export const TTL_SECONDS = 12 * 3600; // 12h, no refresh in v1
 /** Roles allowed to create users and set passwords. */
 export const MANAGER_ROLES = ["super_admin", "admin", "hr_officer"];
 
-const secretKey = () => new TextEncoder().encode(JWT_SECRET);
+/** Throws a descriptive error instead of a cryptic TypeError when the secret is absent. */
+export function secretKey(): Uint8Array {
+  if (!JWT_SECRET) {
+    throw new Error("JWT secret is not configured: set the AUTH_JWT_SECRET secret on the Supabase project.");
+  }
+  return new TextEncoder().encode(JWT_SECRET);
+}
 
 export function service() {
   return createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
