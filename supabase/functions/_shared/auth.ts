@@ -36,11 +36,25 @@ export function service() {
 const CORS_HEADERS: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  // supabase-js / invokeAuthFunction send apikey and x-client-info too; a preflight
+  // that omits any requested header makes the browser abort the real request.
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey, x-client-info, x-supabase-api-version",
 };
 
-export function preflight(): Response {
-  return new Response(null, { headers: CORS_HEADERS });
+/**
+ * Answer a CORS preflight by echoing the headers the browser asked for, so no future
+ * client-side header addition can silently break sign-in.
+ */
+export function preflight(req?: Request): Response {
+  const requested = req?.headers.get("access-control-request-headers");
+  return new Response(null, {
+    status: 204,
+    headers: {
+      ...CORS_HEADERS,
+      ...(requested ? { "Access-Control-Allow-Headers": requested } : {}),
+      "Access-Control-Max-Age": "86400",
+    },
+  });
 }
 
 export function json(data: unknown, status = 200): Response {

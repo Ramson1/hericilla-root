@@ -20,7 +20,7 @@ function tempPassword(): string {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return preflight();
+  if (req.method === "OPTIONS") return preflight(req);
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
   const caller = await requireManager(req);

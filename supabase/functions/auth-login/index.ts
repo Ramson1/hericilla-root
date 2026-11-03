@@ -5,7 +5,7 @@ import bcrypt from "npm:bcryptjs@2.4.3";
 import { json, preflight, service, signToken } from "../_shared/auth.ts";
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return preflight();
+  if (req.method === "OPTIONS") return preflight(req);
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
   try {

@@ -22,7 +22,7 @@ async function sendResetEmail(to: string, name: string, link: string): Promise<v
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return preflight();
+  if (req.method === "OPTIONS") return preflight(req);
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
   let body: Record<string, unknown>;
