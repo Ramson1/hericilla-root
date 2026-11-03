@@ -2,8 +2,9 @@
 // The client sends its JWT + coordinates + target site/work-order; the function
 // loads the site fence, computes haversine distance and returns the verdict,
 // then calls the clock_event() RPC as the user (RLS-safe, append-only).
-// Env: SUPABASE_URL, SUPABASE_ANON_KEY
+// Env: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_JWT_SECRET
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { callerSub } from "../_shared/auth.ts";
 
 function haversineMeters(aLat: number, aLng: number, bLat: number, bLng: number): number {
   const R = 6371000;
@@ -26,8 +27,9 @@ Deno.serve(async (req: Request) => {
     Deno.env.get("SUPABASE_ANON_KEY")!,
     { global: { headers: { authorization: jwt } } },
   );
-  const { data: me, error: meErr } = await supabase.auth.getUser();
-  if (meErr || !me?.user) return Response.json({ error: "invalid session" }, { status: 401 });
+  // Custom auth: verify our own HS256 bearer token (GoTrue auth.getUser() no longer applies).
+  const sub = await callerSub(req);
+  if (!sub) return Response.json({ error: "invalid session" }, { status: 401 });
 
   const body = await req.json();
   const {
