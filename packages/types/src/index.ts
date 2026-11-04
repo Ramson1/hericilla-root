@@ -222,6 +222,8 @@ export interface Profile {
   license_number?: string | null;
   license_expiry?: string | null;
   employed_at?: string | null;
+  /** Owner/automation service login: excluded from rosters and pickers, still audited. */
+  is_system?: boolean;
 }
 
 export interface Client {
@@ -371,6 +373,59 @@ export interface PayrollRun {
   paid_at?: string | null;
   notes?: string | null;
 }
+
+/**
+ * Single source of truth for every CMS-editable text key.
+ * The website reads these keys from `hericilla_page_content`; the admin "Page text"
+ * screen edits exactly this set. Defaults are the wording baked into the site today,
+ * so nothing changes on first render if a key has never been overridden.
+ */
+export const CONTENT_KEYS = {
+  "home.hero_title": {
+    label: "Homepage — big headline",
+    group: "Homepage",
+    default: "Moving cargo. Sourcing equipment. Supporting Nigeria's energy sector.",
+  },
+  "home.hero_subtitle": {
+    label: "Homepage — line under headline",
+    group: "Homepage",
+    default:
+      "Hericilla Support Services Limited delivers integrated logistics, procurement and supply-chain solutions to the Nigerian oil & gas industry — documented, accountable and on time.",
+  },
+  "about_intro": {
+    label: "About page — introduction",
+    group: "About",
+    default:
+      "Hericilla Support Services Limited is a Port Harcourt–based logistics and supply chain company serving oil & gas operators, servicing companies and contractors. Since 2020 we have combined heavy-duty trucking, procurement and contract management, packing and international removals, materials supply and ships agency under one disciplined operation.",
+  },
+  "contact.admin_address": {
+    label: "Administrative office — address",
+    group: "Contact",
+    default: "No 234, Abuloma Road, Abuloma — Port Harcourt, Rivers State",
+  },
+  "contact.ops_address": {
+    label: "Operational base — address",
+    group: "Contact",
+    default: "226 Abuloma Road, Abuloma — Port Harcourt, Rivers State",
+  },
+  "contact.email": {
+    label: "Company email",
+    group: "Contact",
+    default: "hericillasurportservices@gmail.com",
+  },
+  "contact.phone1": {
+    label: "Administrative office — phone",
+    group: "Contact",
+    default: "+234 802 309 1220",
+  },
+  "contact.phone2": {
+    label: "Operational base — phone",
+    group: "Contact",
+    default: "+234 803 403 6596",
+  },
+} as const;
+
+export type ContentKey = keyof typeof CONTENT_KEYS;
 
 export interface NotificationRow {
   id: string;

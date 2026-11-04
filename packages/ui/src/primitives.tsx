@@ -100,7 +100,7 @@ export function PageHeader({
   );
 }
 
-export function HintCard({ steps }: { steps: [string, string, string] }) {
+export function HintCard({ steps }: { steps: string[] }) {
   return (
     <details className="bg-info-100 border-2 border-brand-200 rounded-[var(--radius-card)] p-4 mb-6 group" open>
       <summary className="cursor-pointer font-semibold text-info-800 text-base select-none">

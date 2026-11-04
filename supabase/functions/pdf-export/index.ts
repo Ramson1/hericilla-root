@@ -73,7 +73,7 @@ Deno.serve(async (req: Request) => {
   } else if (kind === "payslip") {
     const { data: ps } = await supabase
       .from("hericilla_payslips")
-      .select("*, employee:hericilla_profiles!payslips_employee_id_fkey(full_name, employee_no, phone), run:hericilla_payroll_runs(period_month, status)")
+      .select("*, employee:hericilla_profiles!hericilla_payslips_employee_id_fkey(full_name, employee_no, phone), run:hericilla_payroll_runs(period_month, status)")
       .eq("id", id).single();
     if (!ps) return Response.json({ error: "payslip not found" }, { status: 404 });
     header("PAYSLIP", `${ps.employee?.employee_no ?? ""} / ${ps.run?.period_month ?? ""}`);
@@ -95,12 +95,15 @@ Deno.serve(async (req: Request) => {
   } else if (kind === "waybill") {
     const { data: j } = await supabase
       .from("hericilla_transport_jobs")
-      .select("*, work_order:hericilla_work_orders(wo_number, title), driver:hericilla_profiles!transport_jobs_driver_id_fkey(full_name, phone, license_number), client:hericilla_clients(name)")
+      // hericilla_transport_jobs has no client_id — the client belongs to the work order, so
+      // it must be reached as a nested embed. A direct "client:hericilla_clients" here makes
+      // every waybill export die with PGRST200.
+      .select("*, work_order:hericilla_work_orders(wo_number, title, client:hericilla_clients(name)), driver:hericilla_profiles!hericilla_transport_jobs_driver_id_fkey(full_name, phone, license_number)")
       .eq("id", id).single();
     if (!j) return Response.json({ error: "job not found" }, { status: 404 });
     header("WAYBILL", j.ref_no);
     line(`Work order: ${j.work_order?.wo_number} — ${j.work_order?.title}`, { size: 10 });
-    line(`Client: ${j.client?.name ?? "—"}`, { size: 10 });
+    line(`Client: ${j.work_order?.client?.name ?? "—"}`, { size: 10 });
     line("");
     line("Pickup", { bold: true }); line(j.pickup_location, { size: 10 });
     line("Destination", { bold: true }); line(j.destination, { size: 10 });

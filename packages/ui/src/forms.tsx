@@ -105,13 +105,24 @@ export interface BigSelectProps extends SelectHTMLAttributes<HTMLSelectElement> 
   hint?: string;
   error?: string;
   options: { value: string; label: string }[];
+  /**
+   * Label of the automatic empty-value option, "— Please choose —" by default. Two selects
+   * need a value="" entry: the ones whose list carries its own ("All types", "Not tied to one
+   * job", "Nobody yet"). Injecting a second one hides the real choice, because a <select>
+   * shows the first option sharing the current value — so a filter set to "All types" would
+   * read "— Please choose —" forever. An empty-value option in `options` wins by itself;
+   * pass null to have no empty option at all.
+   */
+  placeholder?: string | null;
 }
 
-export function BigSelect({ label, hint, error, required, options, ...rest }: BigSelectProps) {
+export function BigSelect({ label, hint, error, required, options, placeholder = "— Please choose —", ...rest }: BigSelectProps) {
+  // The list declaring its own blank entry replaces the injected placeholder.
+  const ownEmpty = options.some((o) => o.value === "");
   return (
     <FieldShell label={label} hint={hint} error={error} required={required}>
       <select className={inputClass} required={required} {...rest}>
-        <option value="">— Please choose —</option>
+        {ownEmpty || placeholder === null ? null : <option value="">{placeholder}</option>}
         {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
